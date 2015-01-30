@@ -29,7 +29,11 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
-EMAIL_HOST = 'localhost'
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = 'radiantstem@gmail.com'
+EMAIL_HOST_PASSWORD = 'Radiantjun_3'
 
 
 # Application definition
@@ -83,6 +87,34 @@ PAYPAL_RECEIVER_EMAIL = "radiantstem@gmail.com"
 
 PAYPAL_TEST = False
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': u'RadiantStemDemo',
+        'HOST': u'localhost',
+        'USER': u'postgres',
+        'PASSWORD': u'postgres',
+        'PORT': 5432
+    }
+}
+
+MIGRATION_MODULES = {
+    'cms': 'cms.migrations_django',
+    'menus': 'menus.migrations_django',
+    'djangocms_text_ckeditor': 'djangocms_text_ckeditor.migrations_django',
+    'djangocms_column': 'djangocms_column.migrations_django',
+    'djangocms_flash': 'djangocms_flash.migrations_django',
+    'djangocms_googlemap': 'djangocms_googlemap.migrations_django',
+    'djangocms_inherit': 'djangocms_inherit.migrations_django',
+    'djangocms_style': 'djangocms_style.migrations_django',
+    'djangocms_file': 'djangocms_file.migrations_django',
+    'djangocms_link': 'djangocms_link.migrations_django',
+    'djangocms_picture': 'djangocms_picture.migrations_django',
+    'djangocms_teaser': 'djangocms_teaser.migrations_django',
+    'djangocms_video': 'djangocms_video.migrations_django',
+    'cmsplugin_cascade': 'cmsplugin_cascade.migrations',
+}
+
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -128,11 +160,15 @@ INSTALLED_APPS = (
     'django.contrib.sitemaps',
     'django.contrib.staticfiles',
     'django.contrib.messages',
+    'django_select2',
+    'cmsplugin_cascade',
     'cms',
     'menus',
+    'mptt',
+    'filer',
+    'easy_thumbnails',
     'sekizai',
     'django_comments',
-    'mptt',
     'tagging',
     'zinnia',
     #'cmsplugin_zinnia',
@@ -141,12 +177,12 @@ INSTALLED_APPS = (
     'djangocms_file',
     'djangocms_flash',
     'djangocms_googlemap',
-    'djangocms_inherit',
-    'djangocms_link',
+    # 'djangocms_inherit',
+    # 'djangocms_link',
     'djangocms_picture',
     'djangocms_teaser',
     'djangocms_video',
-    'reversion',
+    #'reversion',
     'RadiantStem',
     'rest_framework',
     'registration',
@@ -188,25 +224,68 @@ CMS_TEMPLATES = (
 
 CMS_PERMISSION = True
 
-CMS_PLACEHOLDER_CONF = {}
-
-DATABASES = {
-    'default':
-        {'ENGINE': 'django.db.backends.postgresql_psycopg2', 'NAME': u'RadiantStemDemo', 'HOST': u'localhost', 'USER': u'postgres', 'PASSWORD': u'postgres', 'PORT': 5432}
+CMS_PLACEHOLDER_CONF = {
+    'Main Content': {
+        'plugins': ['BootstrapContainerPlugin'],
+    },
 }
 
-MIGRATION_MODULES = {
-    'cms': 'cms.migrations_django',
-    'menus': 'menus.migrations_django',
-    'djangocms_text_ckeditor': 'djangocms_text_ckeditor.migrations_django',
-    'djangocms_column': 'djangocms_column.migrations_django',
-    'djangocms_flash': 'djangocms_flash.migrations_django',
-    'djangocms_googlemap': 'djangocms_googlemap.migrations_django',
-    'djangocms_inherit': 'djangocms_inherit.migrations_django',
-    'djangocms_style': 'djangocms_style.migrations_django',
-    'djangocms_file': 'djangocms_file.migrations_django',
-    'djangocms_link': 'djangocms_link.migrations_django',
-    'djangocms_picture': 'djangocms_picture.migrations_django',
-    'djangocms_teaser': 'djangocms_teaser.migrations_django',
-    'djangocms_video': 'djangocms_video.migrations_django'
+CMSPLUGIN_CASCADE_PLUGINS = ('cmsplugin_cascade.link', 'cmsplugin_cascade.bootstrap3',)
+
+# CMSPLUGIN_CASCADE_WITH_SHARABLES = {
+#     'BootstrapImagePlugin': ('image-shapes', 'image-width-responsive', 'image-width-fixed', 'image-height', 'resize-options',),
+#     'BootstrapPicturePlugin': ('image-shapes', 'responsive-heights', 'image-size', 'resize-options',),
+#     'BootstrapButtonPlugin': ('link',),
+#     'TextLinkPlugin': ('link', 'target',),
+# }
+
+# CMSPLUGIN_CASCADE_LEAF_PLUGINS = ('TextLinkPlugin',)
+
+COLUMN_GLOSSARY = {
+    'breakpoints': ['xs', 'sm', 'md', 'lg'],
+    'container_max_widths': {'xs': 750, 'sm': 750, 'md': 970, 'lg': 1170},
+    'fluid': False,
+    'media_queries': {
+        'xs': ['(max-width: 768px)'],
+        'sm': ['(min-width: 768px)', '(max-width: 992px)'],
+        'md': ['(min-width: 992px)', '(max-width: 1200px)'],
+        'lg': ['(min-width: 1200px)'],
+    },
+}
+
+CMS_PLACEHOLDER_CONF = {
+    'Bootstrap Column': {
+        'plugins': ['BootstrapRowPlugin', 'TextPlugin'],
+        'parent_classes': {'BootstrapRowPlugin': []},
+        'require_parent': False,
+        'glossary': COLUMN_GLOSSARY,
+    },
+}
+
+CKEDITOR_SETTINGS = {
+    'language': '{{ language }}',
+    'skin': 'moono',
+    'toolbar': 'CMS',
+}
+
+FILER_ALLOW_REGULAR_USERS_TO_ADD_ROOT_FOLDERS = True
+
+FILER_DUMP_PAYLOAD = True
+
+THUMBNAIL_PROCESSORS = (
+    'easy_thumbnails.processors.colorspace',
+    'easy_thumbnails.processors.autocrop',
+    'filer.thumbnail_processors.scale_and_crop_with_subject_location',
+    #'easy_thumbnails.processors.scale_and_crop',
+    'easy_thumbnails.processors.filters',
+)
+
+THUMBNAIL_HIGH_RESOLUTION = False
+
+THUMBNAIL_PRESERVE_EXTENSIONS = True
+
+THUMBNAIL_OPTIMIZE_COMMAND = {
+    'png': '/opt/local/bin/optipng {filename}',
+    'gif': '/opt/local/bin/optipng {filename}',
+    'jpeg': '/opt/local/bin/jpegoptim {filename}',
 }
